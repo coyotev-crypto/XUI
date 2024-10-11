@@ -62,6 +62,7 @@ public class SmoothCheckBox extends View implements Checkable {
 
     private boolean mChecked;
     private boolean mTickDrawing;
+    private boolean isScbColorUnchecked;
     private OnCheckedChangeListener mOnCheckedChangeListener;
 
     public SmoothCheckBox(Context context) {
@@ -85,6 +86,7 @@ public class SmoothCheckBox extends View implements Checkable {
         mCheckedColor = array.getColor(R.styleable.SmoothCheckBox_scb_color_checked, ThemeUtils.getMainThemeColor(context));
         mUnCheckedColor = array.getColor(R.styleable.SmoothCheckBox_scb_color_unchecked, Color.WHITE);
         mStrokeWidth = array.getDimensionPixelSize(R.styleable.SmoothCheckBox_scb_stroke_width, 0);
+        isScbColorUnchecked = array.getBoolean(R.styleable.SmoothCheckBox_is_scb_color_unchecked, true);
         array.recycle();
 
         mFloorUnCheckedColor = mFloorColor;
@@ -94,7 +96,7 @@ public class SmoothCheckBox extends View implements Checkable {
         mTickPaint.setColor(tickColor);
 
         mFloorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mFloorPaint.setStyle(Paint.Style.FILL);
+        mFloorPaint.setStyle(Paint.Style.STROKE);
         mFloorPaint.setColor(mFloorColor);
 
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -256,7 +258,9 @@ public class SmoothCheckBox extends View implements Checkable {
     @Override
     protected void onDraw(Canvas canvas) {
         drawBorder(canvas);
-        drawCenter(canvas);
+        if (isScbColorUnchecked){
+            drawCenter(canvas);
+        }
         drawTick(canvas);
     }
 
@@ -267,6 +271,11 @@ public class SmoothCheckBox extends View implements Checkable {
     }
 
     private void drawBorder(Canvas canvas) {
+        if (isChecked()){
+            mFloorPaint.setStyle(Paint.Style.FILL);
+        }else {
+            mFloorPaint.setStyle(Paint.Style.STROKE);
+        }
         mFloorPaint.setColor(mFloorColor);
         int radius = mCenterPoint.x;
         canvas.drawCircle(mCenterPoint.x, mCenterPoint.y, radius * mFloorScale, mFloorPaint);
