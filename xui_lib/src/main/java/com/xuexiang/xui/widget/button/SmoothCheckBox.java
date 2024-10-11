@@ -28,6 +28,7 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.Checkable;
@@ -94,9 +95,8 @@ public class SmoothCheckBox extends View implements Checkable {
         mTickPaint.setColor(tickColor);
 
         mFloorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mFloorPaint.setStyle(Paint.Style.FILL);
+        mFloorPaint.setStyle(Paint.Style.STROKE);
         mFloorPaint.setColor(mFloorColor);
-
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setStyle(Paint.Style.FILL);
         mPaint.setColor(mCheckedColor);
@@ -199,7 +199,7 @@ public class SmoothCheckBox extends View implements Checkable {
     private void reset() {
         mTickDrawing = true;
         mFloorScale = 1.0f;
-        mScaleVal = isChecked() ? 0f : 1.0f;
+        mScaleVal = isChecked() ? 0f : 1f;
         mFloorColor = isChecked() ? mCheckedColor : mFloorUnCheckedColor;
         mDrewDistance = isChecked() ? (mLeftLineDistance + mRightLineDistance) : 0;
     }
@@ -232,6 +232,7 @@ public class SmoothCheckBox extends View implements Checkable {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        Log.i(TAG,"onLayout");
         mWidth = getMeasuredWidth();
         mStrokeWidth = (mStrokeWidth == 0 ? getMeasuredWidth() / 10 : mStrokeWidth);
         mStrokeWidth = Math.min(mStrokeWidth, getMeasuredWidth() / 5);
@@ -251,24 +252,40 @@ public class SmoothCheckBox extends View implements Checkable {
         mRightLineDistance = (float) Math.sqrt(Math.pow(mTickPoints[2].x - mTickPoints[1].x, 2) +
                 Math.pow(mTickPoints[2].y - mTickPoints[1].y, 2));
         mTickPaint.setStrokeWidth(mStrokeWidth);
+        mFloorPaint.setStrokeWidth(mStrokeWidth);
     }
+
+    private static final String TAG = "SmoothCheckBox";
 
     @Override
     protected void onDraw(Canvas canvas) {
-        drawBorder(canvas);
-        drawCenter(canvas);
+        if (isChecked()){
+            drawCenter(canvas);
+        }else {
+            drawBorder(canvas);
+        }
         drawTick(canvas);
     }
 
+    /**
+     * 绘制背景
+     *
+     * @param canvas
+     */
     private void drawCenter(Canvas canvas) {
-        mPaint.setColor(mUnCheckedColor);
-        float radius = (mCenterPoint.x - mStrokeWidth) * mScaleVal;
+        mPaint.setColor(mCheckedColor);
+        float radius = mCenterPoint.x * mFloorScale;
         canvas.drawCircle(mCenterPoint.x, mCenterPoint.y, radius, mPaint);
     }
 
+    /**
+     * 绘制边框
+     *
+     * @param canvas
+     */
     private void drawBorder(Canvas canvas) {
         mFloorPaint.setColor(mFloorColor);
-        int radius = mCenterPoint.x;
+        int radius = mCenterPoint.x - mStrokeWidth;
         canvas.drawCircle(mCenterPoint.x, mCenterPoint.y, radius * mFloorScale, mFloorPaint);
     }
 
